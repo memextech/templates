@@ -89,6 +89,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -523,6 +525,109 @@ gcloud run deploy --source .  # ← No React build = empty static files
 # ✅ Always build first
 ./build.sh  # ← Creates frontend/dist/ and copies to backend/static/
 gcloud run deploy --source .
+
+# ❌ Incorrect MIME types for JavaScript modules
+http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
+# ← Gin's default Static() can serve .js files as text/html
+
+# ✅ Explicit MIME type handling for ES6 modules
+func assetHandler(c *gin.Context) {
+    filePath := c.Param("filepath")
+    fullPath := filepath.Join("static", filePath)
+    
+    ext := filepath.Ext(filePath)
+    switch ext {
+    case ".js":
+        c.Header("Content-Type", "application/javascript")  # ← Critical for ES6 modules
+        c.Header("Cache-Control", "no-cache, no-store, must-revalidate")  # ← Prevent cache issues
+    case ".css":
+        c.Header("Content-Type", "text/css")
+    }
+    
+    c.File(fullPath)
+}
+
+# ❌ Browser caching of bad MIME types during development
+# Symptom: "Failed to load module script: Expected JavaScript but got HTML"
+# ← Browser cached a bad response when MIME type was wrong
+
+# ✅ Clear browser cache or test in incognito mode
+# Always test MIME type fixes in private/incognito window
+# Or use hard refresh (Cmd+Shift+R / Ctrl+Shift+R)
+```
+
+### **Static File Serving & MIME Type Issues:**
+
+**Critical issue with modern React apps using ES6 modules:**
+
+React/Vite builds create ES6 modules (`.js` files with `type="module"`). Browsers enforce strict MIME type checking - if `.js` files are served with `text/html` content-type, the browser will refuse to execute them.
+
+```go
+// ❌ Default Gin static serving can cause MIME type issues
+r.Static("/assets", "web/dist/assets")  // ← May serve .js as text/html
+
+// ✅ Custom handler with explicit MIME types (RECOMMENDED)
+func setupStaticFiles(r *gin.Engine) {
+    // Custom handler for assets with correct MIME types
+    assetHandler := func(c *gin.Context) {
+        filePath := c.Param("filepath")
+        fullPath := filepath.Join("web/dist/assets", filePath)
+        
+        // Explicit MIME type setting
+        ext := filepath.Ext(filePath)
+        switch ext {
+        case ".js":
+            c.Header("Content-Type", "application/javascript")
+            // Prevent caching during development
+            c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+            c.Header("Pragma", "no-cache")
+            c.Header("Expires", "0")
+        case ".css":
+            c.Header("Content-Type", "text/css")
+        case ".json":
+            c.Header("Content-Type", "application/json")
+        }
+        
+        c.File(fullPath)
+    }
+    
+    // Register for both GET and HEAD requests
+    r.GET("/assets/*filepath", assetHandler)
+    r.HEAD("/assets/*filepath", assetHandler)
+    
+    // Other static files
+    r.StaticFile("/", "web/dist/index.html")
+    r.StaticFile("/favicon.ico", "web/dist/favicon.ico")
+    
+    // SPA fallback (serve index.html for non-API routes)
+    r.NoRoute(func(c *gin.Context) {
+        if !strings.HasPrefix(c.Request.URL.Path, "/api/") && 
+           !strings.HasPrefix(c.Request.URL.Path, "/assets/") {
+            c.File("web/dist/index.html")
+        } else {
+            c.JSON(404, gin.H{"error": "Not found"})
+        }
+    })
+}
+```
+
+**Browser caching issues during development:**
+
+When MIME types are fixed, browsers may still use cached bad responses. This is the #1 cause of "it works in curl but not in browser" issues.
+
+```bash
+# ✅ Testing MIME types are correct
+curl -I http://localhost:8080/assets/index-ABC123.js | grep -i content-type
+# Should show: Content-Type: application/javascript
+
+# ✅ If browser still shows MIME type errors:
+# 1. Hard refresh: Cmd+Shift+R (Mac) or Ctrl+Shift+R (Windows/Linux)
+# 2. Test in incognito/private window
+# 3. Clear browser cache completely
+
+# ✅ Verify JavaScript content is served correctly
+curl -s http://localhost:8080/assets/index-ABC123.js | head -3
+# Should show actual JavaScript code, not HTML
 ```
 
 ### **Debugging Failed Deployments:**
@@ -540,6 +645,14 @@ gcloud builds log BUILD_ID
 
 # Common CORS failure in development  
 # Solution: Add enableCORS() to all API handlers
+
+# Common MIME type failure: JavaScript modules not loading
+# Symptom: "Failed to load module script: Expected JavaScript but got HTML"
+# Solution: Use custom handlers with explicit Content-Type headers
+
+# Common browser caching issue after MIME type fixes
+# Symptom: Server fixed but browser still shows errors
+# Solution: Test in incognito mode or hard refresh (Cmd+Shift+R)
 ```
 
 ---
