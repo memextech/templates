@@ -30,7 +30,7 @@ Complete all local setup before any cloud deployment:
 8. Test authentication flow locally (OTP codes in console)
 9. Test CRUD operations locally
 10. Verify app works at `http://localhost:8888`
-11. Ask user to verify app works at `http://localhost:8888`
+11. Ask user to verify app works at `http://localhost:8888` and tell user how to find OTP codes in console
 
 ### Phase 3: Production Deployment
 Only after local setup is fully working and verified by user:
