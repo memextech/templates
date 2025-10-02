@@ -6,5 +6,5 @@
 - `brutalist-functional.md`: Raw utility-focused
 
 **Tech Stack Guidelines** (in this github repo `https://raw.githubusercontent.com/memextech/templates/refs/heads/main//stack/`):
-- `nextjs_fullstack.md`: Next.js App Router + Tailwind + Drizzle + Turso + Better Auth
+- `fullstack_app.md`: Netlify Next.js 15 (App Router) + Tailwind CSS + Turso (SQLite) with Drizzle ORM + Better Auth with Email OTP via Resend
 - `react_website.md`: React + Vite + Tailwind for client-only SPAs
