@@ -25,7 +25,7 @@ Complete all local setup before any cloud deployment:
 3. Setup Turso local development server
 4. Initialize database schema
 5. Create all components and API functions
-6. Use Tailwind CSS to make the app look stunning (ensure textfield hints have the right color)
+6. Use Tailwind CSS to make the app look stunning (ensure textfield text color and hints have grey 400/600 darker color)
 7. Configure Netlify development environment
 8. Test authentication flow locally (OTP codes in console)
 9. Test CRUD operations locally
@@ -439,6 +439,12 @@ export default function Home() {
   return <TodoApp onSignOut={handleSignOut} />;
 }
 ```
+
+### Page text colors
+Ensure all text input fields and textareas to have darker grey colors
+example: 
+`text-gray-900` - Dark gray text color for better readability
+`placeholder:text-gray-400` - Lighter gray for placeholder text hints
 
 ## Authentication Implementation
 
