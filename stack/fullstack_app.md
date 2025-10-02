@@ -1,4 +1,4 @@
-# Full Stack Todo App Implementation Guide
+# Full Stack App Implementation Guide
 
 ## Overview
 A production-ready full-stack application with email OTP authentication, built with Next.js 15, Netlify Functions, and Turso database.
