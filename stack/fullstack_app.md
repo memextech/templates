@@ -153,7 +153,7 @@ import * as dotenv from 'dotenv';
 
 dotenv.config({ path: '.env.local' });
 
-const url = process.env.DATABASE_URL || process.env.TURSO_DATABASE_URL || 'http://127.0.0.1:8080';
+const url = process.env.TURSO_DATABASE_URL || 'http://127.0.0.1:8080';
 const authToken = process.env.TURSO_AUTH_TOKEN;
 
 const config: Config = {
@@ -318,7 +318,7 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
   try {
     // Database connection (MUST use sqlite-proxy)
     const client = createClient({
-      url: process.env.DATABASE_URL || process.env.TURSO_DATABASE_URL || '',
+      url: process.env.TURSO_DATABASE_URL || '',
       authToken: process.env.TURSO_AUTH_TOKEN
     });
 
@@ -480,7 +480,7 @@ const authClient = {
 
 ### Local Development (.env.local)
 ```
-DATABASE_URL="http://127.0.0.1:8080"
+TURSO_DATABASE_URL="http://127.0.0.1:8080"
 BETTER_AUTH_SECRET="min-32-chars"
 NEXT_PUBLIC_APP_URL="http://localhost:8888"
 NODE_ENV="development"
