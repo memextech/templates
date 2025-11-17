@@ -8,3 +8,4 @@
 **Tech Stack Guidelines** (in this github repo `stack/`):
 - `fullstack_app.md`: Netlify Next.js 15 (App Router) + Tailwind CSS + Turso (SQLite) with Drizzle ORM + Better Auth with Email OTP via Resend
 - `react_website.md`: React + Vite + Tailwind for client-only SPAs
+- `python_streamlit.md`: Python + Streamlit for data analytics and visualisation
